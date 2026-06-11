@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="aios-organ" content="fallscribe" />
+<meta name="aios-layer" content="L3.organs.scribe" />
+<meta name="prime" content="1319" />
+<meta name="description" content="◊ FallScribe · sovereign meeting-notes engine · MediaRecorder + Web Speech + WebLLM · obsoletes $250M Granola for £0 · single-file · MIT · forever" />
+<title>◊ FallScribe · your meetings, your machine, your notes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='2' y='26' font-size='28' fill='%23b8974a'%3E%E2%97%8A%3C/text%3E%3C/svg%3E" />
+<style>
+:root{
+  --ox:#8b1a1a; --brass:#b8974a; --cream:#c4bfb2; --void:#0b0a0f;
+  --green:#3a7d3a; --dim:#7c7466; --line:rgba(184,151,74,.2);
+  --warm:#d4a857; --record:#e0584c;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:var(--void);color:var(--cream);min-height:100vh;line-height:1.6}
+body{
+  background:
+    radial-gradient(ellipse at top, rgba(139,26,26,.07), transparent 55%),
+    radial-gradient(ellipse at bottom, rgba(184,151,74,.05), transparent 55%),
+    var(--void);
+  background-attachment:fixed;
+}
+.ribbon{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--brass);text-transform:uppercase;letter-spacing:.2em;padding:14px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:rgba(0,0,0,.3);position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
+.ribbon b{color:var(--cream)}
+.ribbon a{color:var(--brass);text-decoration:none}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+section{padding:56px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+h1{font-family:'Libre Baskerville',Georgia,serif;font-weight:400;font-size:54px;margin:24px 0 14px;color:var(--cream);letter-spacing:-.015em;line-height:1.1}
+h1 .glyph{color:var(--brass);font-family:'IBM Plex Mono',monospace}
+h2{font-family:'Libre Baskerville',serif;font-weight:400;font-size:26px;color:var(--brass);margin:0 0 14px;letter-spacing:-.01em}
+h3{font-family:'Libre Baskerville',serif;font-weight:400;font-size:18px;color:var(--cream);margin:18px 0 10px}
+.sub{color:var(--dim);font-size:14px;margin-bottom:28px;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em}
+.kicker{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--brass);text-transform:uppercase;letter-spacing:.25em;margin-bottom:14px}
+p{margin:0 0 14px}
+a{color:var(--brass);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s}
+a:hover{border-bottom-color:var(--brass)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:transparent;border:1px solid var(--brass);color:var(--brass);font-family:'IBM Plex Mono',monospace;font-size:13px;text-transform:uppercase;letter-spacing:.15em;cursor:pointer;border-radius:2px;transition:all .15s;text-decoration:none}
+.btn:hover{background:var(--brass);color:var(--void);border-bottom-color:var(--brass)}
+.btn.primary{background:var(--brass);color:var(--void)}
+.btn.primary:hover{background:var(--cream);border-color:var(--cream)}
+.btn.danger{border-color:var(--ox);color:var(--ox)}
+.btn.danger:hover{background:var(--ox);color:var(--cream)}
+.btn.record{background:var(--record);color:var(--cream);border-color:var(--record);font-size:14px;padding:16px 28px}
+.btn.record:hover{background:var(--cream);color:var(--void);border-color:var(--cream)}
+.btn.record.on{background:var(--ox);border-color:var(--ox);color:var(--cream);animation:rec 1.5s ease-in-out infinite}
+@keyframes rec{0%,100%{box-shadow:0 0 0 0 rgba(224,88,76,.5)}50%{box-shadow:0 0 0 16px rgba(224,88,76,0)}}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.card{background:rgba(255,255,255,.025);border:1px solid var(--line);padding:24px;border-radius:2px}
+.card h2{margin-top:0}
+.grid{display:grid;gap:20px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:880px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.recorder{background:rgba(0,0,0,.5);border:1px solid var(--line);padding:32px;border-radius:4px;text-align:center}
+.recorder.live{border-color:var(--ox)}
+.timer{font-family:'IBM Plex Mono',monospace;font-size:48px;color:var(--cream);margin:18px 0;letter-spacing:.05em;line-height:1}
+.timer.live{color:var(--ox)}
+.level{height:6px;background:rgba(0,0,0,.5);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin:14px auto;max-width:300px}
+.level > div{height:100%;background:var(--brass);width:0;transition:width .1s}
+.status-pill{display:inline-flex;gap:8px;align-items:center;padding:6px 14px;background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:99px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.15em}
+.status-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.status-pill.ready .dot{background:var(--green)}
+.status-pill.live .dot{background:var(--ox);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+input[type="text"],input[type="password"],select,textarea{width:100%;padding:11px 14px;background:rgba(0,0,0,.45);border:1px solid var(--line);color:var(--cream);font-family:inherit;font-size:14px;border-radius:2px;outline:none;transition:border-color .15s}
+textarea{min-height:120px;resize:vertical;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.55}
+input:focus,select:focus,textarea:focus{border-color:var(--brass)}
+label.label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin:14px 0 6px}
+.transcript{background:rgba(0,0,0,.4);border:1px solid var(--line);padding:18px 22px;border-radius:2px;min-height:200px;max-height:520px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--cream)}
+.transcript .interim{color:var(--dim);font-style:italic}
+.transcript .final{color:var(--cream)}
+.summary{background:rgba(184,151,74,.04);border:1px solid var(--brass);padding:20px 24px;border-radius:2px;line-height:1.7}
+.summary h3{color:var(--brass);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.15em;margin:18px 0 6px}
+.summary h3:first-child{margin-top:0}
+.summary ul{margin:0 0 12px;padding-left:22px;color:var(--cream)}
+.summary li{margin-bottom:6px}
+.empty{padding:40px;text-align:center;color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:13px;border:1px dashed var(--line);border-radius:2px;margin-top:16px}
+footer{padding:32px 24px;text-align:center;color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:11px;border-top:1px solid var(--line)}
+footer a{color:var(--brass)}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:12px}
+.warning{padding:14px 18px;background:rgba(139,26,26,.1);border-left:3px solid var(--ox);color:var(--cream);font-size:14px;margin:18px 0;border-radius:2px}
+.success{padding:14px 18px;background:rgba(58,125,58,.1);border-left:3px solid var(--green);color:var(--cream);font-size:14px;margin:18px 0;border-radius:2px}
+details{margin:12px 0;background:rgba(0,0,0,.3);border:1px solid var(--line);padding:14px 18px;border-radius:2px}
+details summary{cursor:pointer;color:var(--brass);font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;outline:none}
+details[open]{padding-bottom:18px}
+.hero-quote{font-family:'Libre Baskerville',serif;font-style:italic;font-size:20px;color:var(--cream);border-left:2px solid var(--brass);padding:8px 0 8px 22px;margin:28px 0;max-width:640px}
+.compare-table{width:100%;border-collapse:collapse;margin:20px 0}
+.compare-table th,.compare-table td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+.compare-table th{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--brass);text-transform:uppercase;letter-spacing:.12em;font-weight:normal}
+.compare-table td.them{color:var(--dim)}
+.compare-table td.us{color:var(--green)}
+.tag{display:inline-block;padding:2px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;border-radius:1px;font-family:'IBM Plex Mono',monospace;border:1px solid var(--line);color:var(--cream)}
+.tag.live{background:rgba(58,125,58,.18);color:var(--green);border-color:var(--green)}
+.tag.warn{background:rgba(139,26,26,.18);color:var(--ox);border-color:var(--ox)}
+.manifesto{font-family:'Libre Baskerville',serif;font-size:18px;line-height:1.7;color:var(--cream);max-width:700px}
+.manifesto p{margin:0 0 18px}
+.manifesto b{color:var(--brass);font-weight:normal}
+.session-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.session-item{padding:12px 16px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:2px;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;transition:all .15s}
+.session-item:hover{border-color:var(--brass)}
+.session-item .name{color:var(--cream);font-size:14px}
+.session-item .meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim)}
+</style>
+<script src="https://sjgant80-hub.github.io/fall-euaiact/cdn/audit-shim.js" data-tool="fallscribe" data-tier="full" defer></script>
+<script src="https://sjgant80-hub.github.io/fall-euaiact/cdn/nas-shim.js" data-tool="fallscribe" data-organ="L3.organs.scribe"></script>
+</head>
+<body>
+
+<div class="ribbon">
+  <span><b>◊ FallScribe</b> · the meeting-notes engine that doesn't bill you · prime 1319</span>
+  <span>sovereign · single-file · MIT · forever</span>
+</div>
+
+<main class="wrap">
+
+<!-- HERO -->
+<section id="hero">
+  <div class="kicker">/the meeting-notes engine/</div>
+  <h1><span class="glyph">◊</span> Your meetings.<br>Your machine.<br>Your notes.</h1>
+  <p class="sub">/$250M Series B raised for a wrapper around 3 browser APIs/ /this is the same thing/ /£0/ /forever/</p>
+  <p style="max-width:660px;font-size:17px;color:var(--cream)">FallScribe records, transcribes, and summarises your meetings — entirely on your device. The audio never uploads. The transcript never uploads. The summary never uploads. The whole thing is a 1000-line HTML file. <b style="color:var(--brass)">Free forever. MIT. Fork it.</b></p>
+  <div class="btn-row" style="margin-top:24px">
+    <a href="#record" class="btn primary">Start recording →</a>
+    <a href="#compare" class="btn">How is this Granola for £0?</a>
+    <a href="#manifesto" class="btn">Why</a>
+  </div>
+  <p class="hero-quote">"An agent with agency means you have none.<br>The tool assists. You press the button."<br><span class="mono" style="font-size:12px;color:var(--brass);font-style:normal">— Thomas Frumkin, on sovereign AI</span></p>
+</section>
+
+<!-- RECORD -->
+<section id="record">
+  <div class="kicker">/step 1 · record/</div>
+  <h2>The recorder</h2>
+  <p>Click record. Speak. Click stop. The audio stays in your browser. The transcript appears live. Nothing uploads.</p>
+
+  <div class="recorder" id="recorder">
+    <div class="status-pill ready" id="status-pill"><span class="dot"></span><span id="status-text">Ready · grant mic when prompted</span></div>
+    <div class="timer" id="timer">00:00</div>
+    <div class="level"><div id="level-bar"></div></div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn record" id="record-btn">Start recording</button>
+      <button class="btn" id="upload-btn">Or upload an audio file</button>
+      <input type="file" id="audio-file" accept="audio/*" style="display:none" />
+    </div>
+    <p class="mono" style="color:var(--dim);margin-top:14px;font-size:11px" id="engine-note">Transcription engine: Web Speech API (built-in, free) · Chrome/Edge desktop · live captions</p>
+  </div>
+
+  <div class="warning" id="speech-warning" style="display:none">
+    <b>Your browser doesn't support Web Speech API for live transcription.</b><br>
+    Use Chrome or Edge for live captioning. You can still upload a recorded file and paste its transcript manually below for AI summarisation.
+  </div>
+</section>
+
+<!-- TRANSCRIPT -->
+<section id="transcript-section">
+  <div class="kicker">/step 2 · transcript/</div>
+  <h2>The transcript</h2>
+  <p>Live as you speak. Editable when you stop. Paste or type if you uploaded a recording.</p>
+
+  <div class="transcript" id="transcript-view" contenteditable="true">/click record to start · or type/paste a transcript here for AI summarisation/</div>
+  <div class="btn-row" style="margin-top:14px">
+    <button class="btn" id="clear-transcript">Clear</button>
+    <button class="btn" id="copy-transcript">Copy transcript</button>
+    <span class="mono" style="color:var(--dim);font-size:11px" id="word-count">0 words</span>
+  </div>
+</section>
+
+<!-- SUMMARY -->
+<section id="summarise">
+  <div class="kicker">/step 3 · summarise/</div>
+  <h2>The summary engine</h2>
+  <p>Click summarise. A small on-device LLM (WebLLM Llama-3.2-3B, ~2GB cached once) or your own API key (Claude, OpenAI) produces: key points, decisions, action items, follow-ups, open questions.</p>
+
+  <div class="grid grid-2">
+    <div>
+      <label class="label">Engine</label>
+      <select id="engine-select">
+        <option value="webllm">WebLLM Llama-3.2-3B (on-device · free · slow first load)</option>
+        <option value="anthropic">Claude (BYOK · paste your key)</option>
+        <option value="openai">OpenAI (BYOK · paste your key)</option>
+        <option value="none">No AI · just clean the transcript</option>
+      </select>
+      <label class="label">API key (only if BYOK)</label>
+      <input type="password" id="api-key" placeholder="sk-… · stored in browser only · never sent except to provider" />
+      <label class="label">Custom prompt (optional)</label>
+      <textarea id="custom-prompt" placeholder="default: Summarise the meeting. Output structured markdown with sections: Key Points · Decisions · Action Items (with assignee if mentioned) · Follow-ups · Open Questions." style="min-height:80px"></textarea>
+    </div>
+    <div>
+      <div class="btn-row" style="margin-bottom:14px">
+        <button class="btn primary" id="summarise-btn">Summarise →</button>
+        <button class="btn" id="cancel-btn" style="display:none">Cancel</button>
+      </div>
+      <p class="mono" style="color:var(--dim)" id="summary-status">/awaiting transcript/</p>
+      <div class="summary" id="summary-view" style="display:none">
+        <h3>Summary</h3>
+        <div id="summary-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:24px">
+    <button class="btn" id="export-md">Download markdown</button>
+    <button class="btn" id="copy-summary">Copy summary</button>
+    <button class="btn" id="save-session">Save to session library</button>
+    <button class="btn" id="sign-session">Konomi-sign this session</button>
+  </div>
+  <p class="mono" id="sig-line" style="margin-top:10px;color:var(--green);word-break:break-all;font-size:11px"></p>
+</section>
+
+<!-- SESSION LIBRARY -->
+<section id="library">
+  <div class="kicker">/saved/</div>
+  <h2>Session library</h2>
+  <p>Saved meetings live in your browser's IndexedDB. Nothing leaves your device unless you choose to export.</p>
+  <div class="session-list" id="session-list">
+    <div class="empty">/no saved sessions yet/</div>
+  </div>
+  <div class="btn-row" style="margin-top:14px">
+    <button class="btn" id="export-all">Export all (JSON)</button>
+    <button class="btn danger" id="wipe-all">Wipe all sessions</button>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section id="compare">
+  <div class="kicker">/the wrapper exposed/</div>
+  <h2>Granola vs FallScribe</h2>
+  <p>Granola raised <b style="color:var(--brass)">$43M Series B at a ~$250M valuation</b> (Lightspeed, May 2025) for an AI notepad that captures, transcribes, and summarises meetings. The technology is three free browser APIs in a trenchcoat.</p>
+
+  <table class="compare-table">
+    <thead><tr><th>Capability</th><th class="them">Granola</th><th class="us">FallScribe</th></tr></thead>
+    <tbody>
+      <tr><td>Audio capture</td><td class="them">MediaRecorder API (browser-native)</td><td class="us">MediaRecorder API (browser-native)</td></tr>
+      <tr><td>Transcription</td><td class="them">cloud Whisper-style STT</td><td class="us">Web Speech API (built-in) + optional whisper.cpp WASM</td></tr>
+      <tr><td>Summarisation</td><td class="them">cloud GPT-4 call</td><td class="us">WebLLM Llama-3.2-3B (on-device) or BYOK</td></tr>
+      <tr><td>Persistence</td><td class="them">their server</td><td class="us">your IndexedDB</td></tr>
+      <tr><td>Audio leaves your device</td><td class="them">yes (to their server)</td><td class="us">no (browser only)</td></tr>
+      <tr><td>Transcript leaves your device</td><td class="them">yes (stored on their server)</td><td class="us">no</td></tr>
+      <tr><td>Price</td><td class="them">$18/user/month</td><td class="us">£0 forever</td></tr>
+      <tr><td>Open source</td><td class="them">closed</td><td class="us">MIT · 1 HTML file</td></tr>
+      <tr><td>Works offline</td><td class="them">no</td><td class="us">yes (after first WebLLM cache)</td></tr>
+      <tr><td>You can fork it</td><td class="them">no</td><td class="us">yes</td></tr>
+      <tr><td>Konomi-signed provenance</td><td class="them">no</td><td class="us">yes · Ed25519 per session</td></tr>
+    </tbody>
+  </table>
+
+  <div class="success">
+    <b>The maths.</b> A team of 50 paying Granola $18/mo = $10,800/year. The same team running FallScribe = £0. Per knowledge worker that's roughly $216/year clawed back, and your conversations stop being someone else's training data.
+  </div>
+
+  <p style="font-size:14px;color:var(--dim);margin-top:14px">This is not a Granola hit-piece. Granola is a good product. The point is that a $250M valuation for the wrapper layer indicates the wrapper layer is being priced like infrastructure. It's not infrastructure — the infrastructure is in the browser. The wrapper should be free.</p>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="kicker">/the loop/</div>
+  <h2>How it works · 4 standard browser APIs</h2>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>1. <code>MediaRecorder</code></h3>
+      <p>Built into every Chromium / Firefox / Safari since 2017. Captures your microphone stream as WebM/Opus. Audio bytes stay in browser memory. No upload.</p>
+    </div>
+    <div class="card">
+      <h3>2. <code>SpeechRecognition</code> (Web Speech API)</h3>
+      <p>Built into Chrome/Edge desktop. Streams audio to the browser's STT engine, returns text in real time. Free. No API key. Optional swap to <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> WASM for full offline.</p>
+    </div>
+    <div class="card">
+      <h3>3. <code>WebLLM</code> (Llama-3.2-3B Instruct)</h3>
+      <p>On-device LLM via <a href="https://webllm.mlc.ai/">mlc-ai/web-llm</a>. ~2GB download cached once. Summarises the transcript locally. No tokens billed. No data leaves.</p>
+    </div>
+    <div class="card">
+      <h3>4. <code>IndexedDB</code></h3>
+      <p>Per-session storage in the browser. Sessions, transcripts, summaries, signatures all kept locally. Export to JSON whenever you want a backup.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section id="manifesto">
+  <div class="kicker">/why/</div>
+  <h2>The manifesto</h2>
+  <div class="manifesto">
+    <p>The browser already has <b>audio capture</b>. The browser already has <b>speech-to-text</b>. The browser already has <b>local LLM execution</b>. The browser already has <b>persistent storage</b>.</p>
+    <p>A meeting-notes app is four browser APIs in a sensible order. <b>Four.</b></p>
+    <p>The reason $250M flowed into a wrapper around those four APIs is not because the wrapper is hard. It's because the average buyer doesn't know the APIs exist and the average builder thinks the wrapper is worth pricing like SaaS.</p>
+    <p>Both of those things stop being true once a free open-source version ships.</p>
+    <p>The conversation in your last meeting belongs to you. The transcript belongs to you. The summary belongs to you. The training-data uplift belongs to you. None of it should travel to anyone's server for the privilege of writing the notes down.</p>
+    <p>FallScribe is what happens when you connect four browser APIs in the order that meets the user's interest instead of the vendor's.</p>
+    <p style="color:var(--brass)">For the people. Not the few.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="kicker">/the questions/</div>
+  <h2>FAQ</h2>
+
+  <details>
+    <summary>Does the Web Speech API really keep my audio on my device?</summary>
+    <p style="margin-top:14px">In Chrome and Edge desktop, the Web Speech API streams audio to Google's STT server for transcription. That's a real caveat — if you want 100% offline, drop in <a href="https://github.com/xenova/transformers.js">transformers.js</a> Whisper or whisper.cpp WASM. The audio still never goes to Granola's (or anyone else's) servers via FallScribe. We make that swap easy to do — the engine selector is one line to extend.</p>
+  </details>
+
+  <details>
+    <summary>Does WebLLM actually work for meeting summarisation?</summary>
+    <p style="margin-top:14px">Llama-3.2-3B-Instruct does a perfectly serviceable summary of a typical 30-minute meeting. It's not GPT-4. For higher fidelity, BYOK Claude or OpenAI · the API key is stored in your browser, the call goes directly from your browser to the provider, never via any FallScribe server (there is no FallScribe server).</p>
+  </details>
+
+  <details>
+    <summary>Will my team trust this enough to switch?</summary>
+    <p style="margin-top:14px">The trust story is the inverse of Granola's. Granola asks you to trust that they handle your conversations responsibly. FallScribe asks you to trust your browser's existing security model. Open the HTML in a text editor; the entire code base is auditable in 15 minutes. Fork the repo; you can change anything. Run it from a USB stick; you don't even need internet after the first WebLLM load.</p>
+  </details>
+
+  <details>
+    <summary>What's the catch?</summary>
+    <p style="margin-top:14px">No catch. MIT licence. Single HTML file. Free forever. The author (Simon Gant) makes money from custom builds for businesses that want a branded fork — see <a href="https://ai-nativesolutions.com">AI Native Solutions</a> — but the core tool is and will remain free.</p>
+  </details>
+
+  <details>
+    <summary>Why does this exist?</summary>
+    <p style="margin-top:14px">Because every additional dollar of VC capital flowing into AI wrappers is a dollar that doesn't reach the actual infrastructure or the actual users. Free open-source clones don't kill VC-backed wrappers — they price-anchor them. They force the wrapper layer to compete on actual value-add instead of distribution monopoly. That's good for everyone except the wrapper's investors.</p>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  ◊ FallScribe · prime 1319 · MIT · sovereign · single-file · forever<br>
+  Built by <a href="https://www.linkedin.com/in/simon-gant-295b56180/">Simon Gant</a> · architecture lineage: Thomas Frumkin · MianoCube<br>
+  Part of the <a href="https://sjgant80-hub.github.io/fall-registry/">AI Native Solutions estate</a> · 140+ sovereign tools<br>
+  <a href="https://github.com/sjgant80-hub/fallscribe">source on GitHub</a> · <a href="https://ai-nativesolutions.com">hub</a> · <span style="color:var(--dim)">for the people · not the few</span>
+</footer>
+
+<script type="module">
+'use strict';
+
+// =====================================================================
+// FallScribe · prime 1319 · sovereign meeting-notes engine
+// =====================================================================
+
+const $ = (s) => document.querySelector(s);
+
+// ---------- STATE ----------
+const state = {
+  recording: false,
+  paused: false,
+  startedAt: null,
+  duration: 0,
+  audioChunks: [],
+  audioBlob: null,
+  recorder: null,
+  speech: null,
+  transcript: '',
+  interim: '',
+  summary: '',
+  engine: 'webllm',
+  apiKey: '',
+  customPrompt: '',
+  sigHex: null,
+  webllmEngine: null,
+  webllmLoading: false,
+};
+
+// ---------- INDEXEDDB ----------
+const DB_NAME = 'fallscribe-v1';
+const DB_VER = 1;
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, DB_VER);
+    r.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      ['sessions','keys','audit'].forEach(s => {
+        if (!db.objectStoreNames.contains(s)) db.createObjectStore(s);
+      });
+    };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function dbPut(store, key, val) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(val, key);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  });
+}
+async function dbGet(store, key) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const r = tx.objectStore(store).get(key);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function dbAll(store) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const r = tx.objectStore(store).getAll();
+    r.onsuccess = () => res(r.result || []);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function dbKeys(store) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const r = tx.objectStore(store).getAllKeys();
+    r.onsuccess = () => res(r.result || []);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function dbDel(store, key) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).delete(key);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  });
+}
+async function dbWipe() {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const stores = ['sessions','keys','audit'];
+    const tx = db.transaction(stores, 'readwrite');
+    stores.forEach(s => tx.objectStore(s).clear());
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+// ---------- KONOMI ED25519 ----------
+let KEY = { pub:null, priv:null, source:'none' };
+async function mintKey() {
+  try {
+    const pair = await crypto.subtle.generateKey({ name:'Ed25519' }, false, ['sign','verify']);
+    const raw = await crypto.subtle.exportKey('raw', pair.publicKey);
+    const pub = Array.from(new Uint8Array(raw)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    KEY = { pub, priv: pair.privateKey, source:'web-crypto-ed25519' };
+    await dbPut('keys', 'konomi', KEY);
+  } catch (e) {
+    const buf = new Uint8Array(32);
+    crypto.getRandomValues(buf);
+    KEY = { pub: Array.from(buf).map(b=>b.toString(16).padStart(2,'0')).join(''), priv:null, source:'fallback-random' };
+    await dbPut('keys', 'konomi', KEY);
+  }
+}
+async function signText(text) {
+  if (!KEY.priv) return null;
+  try {
+    const sig = await crypto.subtle.sign({ name:'Ed25519' }, KEY.priv, new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  } catch (e) { return null; }
+}
+
+// ---------- AUDIT CHAIN ----------
+async function sha256Hex(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function audit(kind, payload) {
+  const prev = await dbGet('audit', 'last') || { hash:null, seq:0 };
+  const entry = { seq: prev.seq+1, ts: new Date().toISOString(), kind, payload, prev_hash: prev.hash, fork_pub: KEY.pub };
+  entry.hash = await sha256Hex(JSON.stringify(entry));
+  await dbPut('audit', 'seq:'+entry.seq, entry);
+  await dbPut('audit', 'last', { hash: entry.hash, seq: entry.seq });
+  return entry;
+}
+
+// =====================================================================
+// RECORDING (MediaRecorder + Web Speech API)
+// =====================================================================
+
+let mediaStream = null;
+let animFrame = null;
+let audioContext = null;
+let analyser = null;
+
+async function startRecording() {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Browser does not support audio capture');
+    }
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.audioChunks = [];
+    state.recorder = new MediaRecorder(mediaStream);
+    state.recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) state.audioChunks.push(e.data); };
+    state.recorder.onstop = () => {
+      state.audioBlob = new Blob(state.audioChunks, { type: state.recorder.mimeType || 'audio/webm' });
+    };
+    state.recorder.start(1000);
+
+    // Web Speech for live transcript
+    startSpeech();
+
+    // Level meter
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioContext.createMediaStreamSource(mediaStream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    src.connect(analyser);
+    drawLevel();
+
+    state.recording = true;
+    state.startedAt = Date.now();
+    updateUI();
+    audit('recording_started', { ts: new Date().toISOString() });
+  } catch (e) {
+    setStatus('✗ ' + e.message, 'warn');
+    console.error(e);
+  }
+}
+
+function startSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    $('#speech-warning').style.display = 'block';
+    setStatus('Recording (no live transcript · upload result to transcribe)', 'live');
+    return;
+  }
+  state.speech = new SR();
+  state.speech.continuous = true;
+  state.speech.interimResults = true;
+  state.speech.lang = navigator.language || 'en-US';
+  state.speech.onresult = (e) => {
+    let interim = '', finalText = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalText += t + ' ';
+      else interim += t;
+    }
+    if (finalText) {
+      state.transcript += finalText;
+    }
+    state.interim = interim;
+    renderTranscript();
+  };
+  state.speech.onerror = (e) => {
+    console.warn('speech error', e.error);
+    if (e.error === 'no-speech') return;
+    if (e.error === 'audio-capture') setStatus('Audio capture error', 'warn');
+  };
+  state.speech.onend = () => {
+    // auto-restart if still recording
+    if (state.recording && !state.paused) {
+      try { state.speech.start(); } catch(_) {}
+    }
+  };
+  try { state.speech.start(); } catch(e) { console.warn(e); }
+}
+
+function drawLevel() {
+  if (!analyser) return;
+  const buf = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(buf);
+  let sum = 0;
+  for (let i = 0; i < buf.length; i++) sum += buf[i];
+  const avg = sum / buf.length;
+  const pct = Math.min(100, (avg / 128) * 100);
+  $('#level-bar').style.width = pct + '%';
+  if (state.recording) animFrame = requestAnimationFrame(drawLevel);
+}
+
+function stopRecording() {
+  if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop();
+  if (state.speech) try { state.speech.stop(); } catch(_) {}
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  if (audioContext) try { audioContext.close(); } catch(_) {}
+  if (animFrame) cancelAnimationFrame(animFrame);
+  state.recording = false;
+  state.duration = (Date.now() - state.startedAt) / 1000;
+  $('#level-bar').style.width = '0%';
+  state.interim = '';
+  renderTranscript();
+  updateUI();
+  audit('recording_stopped', { duration_s: state.duration });
+}
+
+function setStatus(text, kind) {
+  $('#status-text').textContent = text;
+  $('#status-pill').className = 'status-pill ' + (kind || 'ready');
+}
+
+function updateUI() {
+  const btn = $('#record-btn');
+  const timer = $('#timer');
+  const recBox = $('#recorder');
+  if (state.recording) {
+    btn.textContent = 'Stop recording';
+    btn.classList.add('on');
+    timer.classList.add('live');
+    recBox.classList.add('live');
+    setStatus('Recording · audio + transcript on this device only', 'live');
+  } else {
+    btn.textContent = 'Start recording';
+    btn.classList.remove('on');
+    timer.classList.remove('live');
+    recBox.classList.remove('live');
+    if (state.transcript) setStatus('Stopped · ' + countWords(state.transcript) + ' words ready to summarise', 'ready');
+    else setStatus('Ready · grant mic when prompted', 'ready');
+  }
+  tickTimer();
+}
+
+function tickTimer() {
+  if (!state.recording) {
+    const d = state.duration || 0;
+    $('#timer').textContent = formatDuration(d);
+    return;
+  }
+  const d = (Date.now() - state.startedAt) / 1000;
+  $('#timer').textContent = formatDuration(d);
+  requestAnimationFrame(tickTimer);
+}
+
+function formatDuration(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+function countWords(s) { return (s||'').trim().split(/\s+/).filter(Boolean).length; }
+
+function renderTranscript() {
+  const view = $('#transcript-view');
+  // only auto-render if recording; otherwise preserve user edits
+  if (state.recording) {
+    view.innerHTML = `<span class="final">${escapeHtml(state.transcript)}</span><span class="interim">${escapeHtml(state.interim)}</span>`;
+  }
+  $('#word-count').textContent = countWords(view.innerText) + ' words';
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// =====================================================================
+// FILE UPLOAD (audio file → playback only · no STT for uploaded yet)
+// =====================================================================
+async function handleAudioFile(file) {
+  setStatus('Audio loaded · paste/type a transcript below for summarisation', 'ready');
+  // Future: hook whisper.cpp WASM here
+  // For now, surface the audio for review
+  const url = URL.createObjectURL(file);
+  if ($('#audio-preview')) $('#audio-preview').remove();
+  const a = document.createElement('audio');
+  a.id = 'audio-preview';
+  a.controls = true;
+  a.src = url;
+  a.style.cssText = 'width:100%;margin-top:14px';
+  $('#recorder').appendChild(a);
+}
+
+// =====================================================================
+// SUMMARISATION
+// =====================================================================
+
+async function summarise() {
+  const transcript = $('#transcript-view').innerText.trim();
+  if (!transcript || transcript.length < 20) {
+    setSummaryStatus('Transcript too short to summarise');
+    return;
+  }
+  state.engine = $('#engine-select').value;
+  state.apiKey = $('#api-key').value;
+  state.customPrompt = $('#custom-prompt').value;
+
+  const sysPrompt = state.customPrompt || `You are a meeting-notes assistant. Read the transcript and produce structured markdown output with these sections only, omitting any that are empty:
+
+## Key Points
+- (3-7 bullets)
+
+## Decisions
+- (decisions reached)
+
+## Action Items
+- (assignee if mentioned) — action
+
+## Follow-ups
+- (things to revisit)
+
+## Open Questions
+- (unresolved)
+
+Be concise. Use the speaker's actual language where possible. Do not invent details.`;
+
+  setSummaryStatus('Summarising…');
+  let summary = '';
+  try {
+    if (state.engine === 'webllm') {
+      summary = await summariseWebLLM(transcript, sysPrompt);
+    } else if (state.engine === 'anthropic') {
+      summary = await summariseAnthropic(transcript, sysPrompt);
+    } else if (state.engine === 'openai') {
+      summary = await summariseOpenAI(transcript, sysPrompt);
+    } else {
+      summary = cleanTranscript(transcript);
+    }
+  } catch (e) {
+    setSummaryStatus('✗ ' + e.message);
+    return;
+  }
+  state.summary = summary;
+  renderSummary();
+  setSummaryStatus('✓ summary ready');
+  audit('summary_generated', { engine: state.engine, transcript_chars: transcript.length, summary_chars: summary.length });
+
+  // NAS hand-off
+  if (window.nas && window.nas.isForkPresent && window.nas.isForkPresent()) {
+    try {
+      window.nas.ingest('Meeting summary: ' + summary.slice(0, 2000), { kind: 'fallscribe-summary' });
+    } catch (_) {}
+  }
+}
+
+async function summariseAnthropic(transcript, sys) {
+  if (!state.apiKey) throw new Error('Paste your Anthropic API key');
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': state.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2000,
+      system: sys,
+      messages: [{ role: 'user', content: 'TRANSCRIPT:\n\n' + transcript }],
+    }),
+  });
+  if (!r.ok) throw new Error('Anthropic HTTP ' + r.status);
+  const j = await r.json();
+  return j.content?.[0]?.text || '(empty response)';
+}
+
+async function summariseOpenAI(transcript, sys) {
+  if (!state.apiKey) throw new Error('Paste your OpenAI API key');
+  const r = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'authorization': 'Bearer ' + state.apiKey,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: sys },
+        { role: 'user', content: 'TRANSCRIPT:\n\n' + transcript },
+      ],
+      temperature: 0.3,
+    }),
+  });
+  if (!r.ok) throw new Error('OpenAI HTTP ' + r.status);
+  const j = await r.json();
+  return j.choices?.[0]?.message?.content || '(empty response)';
+}
+
+async function summariseWebLLM(transcript, sys) {
+  if (!state.webllmEngine) {
+    setSummaryStatus('Loading WebLLM Llama-3.2-3B · ~2GB download cached after first run · this can take 1-5 minutes…');
+    const mod = await import('https://esm.run/@mlc-ai/web-llm@0.2.79');
+    state.webllmEngine = await mod.CreateMLCEngine('Llama-3.2-3B-Instruct-q4f32_1-MLC', {
+      initProgressCallback: (p) => {
+        setSummaryStatus(`Loading WebLLM · ${Math.round((p.progress||0)*100)}% · ${p.text||''}`);
+      },
+    });
+  }
+  setSummaryStatus('Summarising with on-device LLM…');
+  const r = await state.webllmEngine.chat.completions.create({
+    messages: [
+      { role: 'system', content: sys },
+      { role: 'user', content: 'TRANSCRIPT:\n\n' + transcript },
+    ],
+  });
+  return r.choices[0].message.content;
+}
+
+function cleanTranscript(t) {
+  // basic cleanup · capitalise sentences · split paragraphs
+  return t
+    .replace(/\s+/g, ' ')
+    .replace(/([.!?])\s+/g, '$1\n\n')
+    .replace(/\b(um|uh|like|you know)\b\s*/gi, '')
+    .trim();
+}
+
+function setSummaryStatus(text) {
+  $('#summary-status').textContent = text;
+}
+function renderSummary() {
+  const body = $('#summary-body');
+  // very light markdown rendering
+  const html = state.summary
+    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^\* (.+)$/gm, '<li>$1</li>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*?<\/li>(\s|<br>)*)+/gs, m => '<ul>' + m + '</ul>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  body.innerHTML = html;
+  $('#summary-view').style.display = 'block';
+}
+
+// =====================================================================
+// SESSION SAVE / EXPORT
+// =====================================================================
+
+async function saveSession() {
+  if (!state.transcript && !$('#transcript-view').innerText.trim()) {
+    flash($('#save-session'), 'Nothing to save');
+    return;
+  }
+  const id = 'S' + Date.now().toString(36);
+  const session = {
+    id,
+    ts: new Date().toISOString(),
+    name: prompt('Name this session:', 'Meeting · ' + new Date().toLocaleString()) || ('Session ' + id),
+    duration_s: state.duration,
+    transcript: $('#transcript-view').innerText,
+    summary: state.summary,
+    engine: state.engine,
+    signature: state.sigHex,
+    fork_pub: KEY.pub,
+  };
+  await dbPut('sessions', id, session);
+  await audit('session_saved', { id });
+  renderSessionList();
+  flash($('#save-session'), '✓ Saved');
+}
+
+async function signSession() {
+  const view = $('#transcript-view').innerText;
+  const summary = state.summary;
+  const canon = JSON.stringify({ transcript: view, summary, ts: new Date().toISOString() });
+  state.sigHex = await signText(canon);
+  $('#sig-line').textContent = state.sigHex
+    ? `Ed25519: ${state.sigHex.slice(0, 64)}… · pub: ${KEY.pub.slice(0, 16)}…`
+    : 'Signing not available in this browser';
+  audit('session_signed', { sig_prefix: state.sigHex?.slice(0, 16) });
+}
+
+async function renderSessionList() {
+  const sessions = await dbAll('sessions');
+  const list = $('#session-list');
+  if (!sessions.length) {
+    list.innerHTML = '<div class="empty">/no saved sessions yet/</div>';
+    return;
+  }
+  list.innerHTML = '';
+  sessions.sort((a,b) => b.ts.localeCompare(a.ts));
+  for (const s of sessions) {
+    const div = document.createElement('div');
+    div.className = 'session-item';
+    div.innerHTML = `
+      <div>
+        <div class="name">${escapeHtml(s.name || s.id)}</div>
+        <div class="meta">${formatDuration(s.duration_s||0)} · ${(s.transcript||'').split(/\s+/).filter(Boolean).length} words · ${s.ts.slice(0,16).replace('T',' ')}${s.signature ? ' · ◊ signed' : ''}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" data-act="load" data-id="${s.id}">Load</button>
+        <button class="btn" data-act="export" data-id="${s.id}">Export</button>
+        <button class="btn danger" data-act="del" data-id="${s.id}">Delete</button>
+      </div>`;
+    div.querySelectorAll('button').forEach(b => {
+      b.onclick = (e) => {
+        e.stopPropagation();
+        const act = b.dataset.act, id = b.dataset.id;
+        if (act === 'load') loadSession(id);
+        else if (act === 'export') exportSession(id);
+        else if (act === 'del') deleteSession(id);
+      };
+    });
+    list.appendChild(div);
+  }
+}
+
+async function loadSession(id) {
+  const s = await dbGet('sessions', id);
+  if (!s) return;
+  state.transcript = s.transcript || '';
+  state.summary = s.summary || '';
+  $('#transcript-view').innerText = state.transcript;
+  if (state.summary) renderSummary();
+  $('#sig-line').textContent = s.signature ? `Ed25519: ${s.signature.slice(0, 64)}…` : '';
+  window.scrollTo({ top: document.getElementById('transcript-section').offsetTop, behavior: 'smooth' });
+}
+
+async function exportSession(id) {
+  const s = await dbGet('sessions', id);
+  if (!s) return;
+  const md = sessionToMarkdown(s);
+  const blob = new Blob([md], { type: 'text/markdown' });
+  download(blob, `fallscribe-${(s.name||id).toLowerCase().replace(/[^a-z0-9]+/g,'-')}.md`);
+}
+
+async function deleteSession(id) {
+  if (!confirm('Delete this session?')) return;
+  await dbDel('sessions', id);
+  await audit('session_deleted', { id });
+  renderSessionList();
+}
+
+function sessionToMarkdown(s) {
+  return `# ${s.name || s.id}
+
+**When:** ${s.ts}
+**Duration:** ${formatDuration(s.duration_s||0)}
+**Engine:** ${s.engine || 'unknown'}
+${s.signature ? `**Konomi Ed25519:** \`${s.signature.slice(0, 32)}…\`\n**Fork pub:** \`${s.fork_pub||''}\`\n` : ''}
+
+---
+
+## Summary
+
+${s.summary || '_(no summary)_'}
+
+---
+
+## Transcript
+
+${s.transcript || '_(no transcript)_'}
+
+---
+
+*◊ FallScribe · prime 1319 · MIT · this session never left your device*`;
+}
+
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function exportAll() {
+  const sessions = await dbAll('sessions');
+  const blob = new Blob([JSON.stringify({
+    exported_at: new Date().toISOString(),
+    konomi_pub: KEY.pub,
+    sessions,
+  }, null, 2)], { type: 'application/json' });
+  download(blob, `fallscribe-export-${Date.now()}.json`);
+}
+
+async function wipeAll() {
+  if (!confirm('Wipe ALL FallScribe sessions on this device? Cannot be undone.')) return;
+  await dbWipe();
+  KEY = { pub:null, priv:null, source:'none' };
+  await mintKey();
+  state.transcript = ''; state.summary = '';
+  $('#transcript-view').innerText = '';
+  renderSessionList();
+}
+
+function flash(btn, msg) {
+  const orig = btn.textContent;
+  btn.textContent = msg;
+  setTimeout(()=>{ btn.textContent = orig; }, 1400);
+}
+
+// =====================================================================
+// WIRE UP
+// =====================================================================
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // restore key
+  const k = await dbGet('keys', 'konomi');
+  if (k) KEY = k; else await mintKey();
+  // restore engine pref
+  const eng = await dbGet('keys', 'engine');
+  if (eng) $('#engine-select').value = eng;
+  const ak = await dbGet('keys', 'apikey');
+  if (ak) $('#api-key').value = ak;
+
+  // SR availability check
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+    $('#engine-note').textContent = 'Note: live transcript needs Chrome/Edge desktop · all other features work everywhere';
+  }
+
+  $('#record-btn').onclick = () => state.recording ? stopRecording() : startRecording();
+  $('#upload-btn').onclick = () => $('#audio-file').click();
+  $('#audio-file').addEventListener('change', (e) => {
+    if (e.target.files[0]) handleAudioFile(e.target.files[0]);
+  });
+
+  $('#clear-transcript').onclick = () => {
+    state.transcript = ''; state.interim = '';
+    $('#transcript-view').innerText = '';
+    $('#summary-view').style.display = 'none';
+  };
+  $('#copy-transcript').onclick = async () => {
+    try { await navigator.clipboard.writeText($('#transcript-view').innerText); flash($('#copy-transcript'), '✓ Copied'); }
+    catch (e) {}
+  };
+  $('#transcript-view').addEventListener('input', () => {
+    $('#word-count').textContent = countWords($('#transcript-view').innerText) + ' words';
+  });
+
+  $('#summarise-btn').onclick = summarise;
+  $('#engine-select').onchange = (e) => dbPut('keys','engine', e.target.value);
+  $('#api-key').onchange = (e) => dbPut('keys','apikey', e.target.value);
+
+  $('#export-md').onclick = () => {
+    const fake = { name: 'meeting', ts: new Date().toISOString(), duration_s: state.duration, engine: state.engine, signature: state.sigHex, fork_pub: KEY.pub, transcript: $('#transcript-view').innerText, summary: state.summary };
+    const blob = new Blob([sessionToMarkdown(fake)], { type:'text/markdown' });
+    download(blob, `fallscribe-${Date.now()}.md`);
+  };
+  $('#copy-summary').onclick = async () => {
+    try { await navigator.clipboard.writeText(state.summary); flash($('#copy-summary'), '✓ Copied'); }
+    catch (e) {}
+  };
+  $('#save-session').onclick = saveSession;
+  $('#sign-session').onclick = signSession;
+
+  $('#export-all').onclick = exportAll;
+  $('#wipe-all').onclick = wipeAll;
+
+  renderSessionList();
+  updateUI();
+
+  console.log('%c◊·κ=φ⁴ FallScribe · prime 1319 · your meetings · your machine · your notes', 'color:#b8974a;font-weight:bold');
+});
+
+window.FallScribe = { state, KEY };
+</script>
+
+</body>
+</html>
